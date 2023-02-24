@@ -3,14 +3,14 @@ const Sauce = require('../models/Sauce');
 exports.getAllSauces = (req, res, next) => {
     setTimeout(()=>{
         Sauce.find()
-        .then(sauces => res.status(200).json({sauces}))
+        .then(sauces => res.status(200).send(sauces))
         .catch(error => res.status(500).json({error}));
     }, 500);
 };
 
 exports.getOneSauce = (req, res, next) => {
     Sauce.findOne({ _id: req.params.id })
-    .then(sauce => res.status(200).json(sauce))
+    .then(sauce => res.status(200).send(sauce))
     .catch(error => res.status(404).json({ error }));
 };
 
@@ -34,10 +34,16 @@ exports.createOneSauce = (req, res, next) => {
       });
 };
 
-
-
 exports.modifyOneSauce = (req, res, next) => {
-    console.log('ok')
+    if(typeof req.file == "undefined"){
+        Sauce.updateOne({_id: req.params.id}, {...req.body})
+        .then(res.status(200).json({ message : "Sauce modifié !"}))
+        .catch(error => res.status(400).json({ error }));
+    } else {
+        Sauce.updateOne({_id: req.params.id}, {...req.body, imageUrl :`${req.protocol}://${req.get('host')}/images/${req.file.filename}`})
+        .then(res.status(200).json({ message : "Sauce modifié !"}))
+        .catch(error => res.status(400).json({ error }));
+    }
 };
 
 exports.deleteOneSauce = (req, res, next) => {
@@ -47,5 +53,5 @@ exports.deleteOneSauce = (req, res, next) => {
 };
 
 exports.isLikeOrDislike = (req, res, next) => {
-    console.log('ok')
+    console.log(req.body)
 };
